@@ -1,8 +1,8 @@
-"""FIXME main."""
+"""Chaos Assistant main."""
 
 
 def main():
-    """FIXME main."""
+    """Chaos Assistant main."""
     print("Hello world!")
 
 

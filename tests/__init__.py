@@ -1,1 +1,1 @@
-"""FIXME tests."""
+"""Chaos Assistant tests."""

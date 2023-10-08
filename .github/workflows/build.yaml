@@ -28,8 +28,8 @@ jobs:
       - name: Build and run Dev Container task
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/marekpikula/python-poetry-vscode-template/devcontainer
-          cacheFrom: ghcr.io/marekpikula/python-poetry-vscode-template/devcontainer
+          imageName: ghcr.io/marekpikula/chaos-assistant/devcontainer
+          cacheFrom: ghcr.io/marekpikula/chaos-assistant/devcontainer
           push: always
 
   test:
@@ -59,7 +59,7 @@ jobs:
 
       - name: Test
         run: |
-            poetry run pytest tests/ --cov=fixme_project_name --cov-report=term \
+            poetry run pytest tests/ --cov=chaos_assistant --cov-report=term \
                 --cov-report=xml:output/coverage/cov.xml \
                 --cov-report=html:output/coverage/html
 

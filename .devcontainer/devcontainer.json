@@ -1,11 +1,11 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/python
 {
-	"name": "FIXME",
+	"name": "Chaos Assistant",
 	"build": {
 		"dockerfile": "./Dockerfile",
 		"context": ".",
-		"cacheFrom": "ghcr.io/marekpikula/python-poetry-vscode-template/devcontainer"
+		"cacheFrom": "ghcr.io/marekpikula/chaos-assistant/devcontainer"
 	},
 	"features": {
 		"ghcr.io/meaningful-ooo/devcontainer-features/fish:1": {},

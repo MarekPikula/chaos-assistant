@@ -1,19 +1,19 @@
 [tool.poetry]
-name = "fixme-project-name"
+name = "chaos-assistant"
 version = "0.1.0"
-description = "FIXME project descripion."
+description = "Chaos Assistant TODO for chaotic project management."
 authors = ["Marek Pikuła <marek@serenitycode.dev>"]
 maintainers = ["Marek Pikuła <marek@serenitycode.dev>"]
-license = "MIT"
+license = "LGPL-3.0-or-later"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Operating System :: OS Independent",
 ]
-repository = "https://github.com/MarekPikula/fixme"
-# documentation = "https://fixme.readthedocs.io"
+repository = "https://github.com/MarekPikula/chaos-assistant"
+# documentation = "https://chaos-assistant.readthedocs.io"
 readme = "README.md"
 packages = [
-    {include = "fixme_project_name"},
+    {include = "chaos_assistant"},
 ]
 
 [tool.poetry.dependencies]
@@ -24,7 +24,7 @@ loguru = "^0.7.2"
 [tool.poetry.extras]
 
 [tool.poetry.scripts]
-fixme = "fixme_project_name.__main__:main"
+chaos-assistant = "chaos_assistant.__main__:main"
 
 [tool.poetry.group.lint.dependencies]
 black = "^23.9.1"

@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: FIXME",
+            "name": "Python: Chaos Assistant",
             "type": "python",
             "request": "launch",
-            "module": "fixme_project_name.__main__",
+            "module": "chaos_assistant.__main__",
             "justMyCode": false,
             "cwd": "${workspaceFolder}",
             // "args": []
