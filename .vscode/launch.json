@@ -13,5 +13,13 @@
             "cwd": "${workspaceFolder}",
             // "args": []
         },
+        {
+            "name": "Python: Generate schemas",
+            "type": "python",
+            "request": "launch",
+            "module": "chaos_assistant.models.file",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}",
+        },
     ]
 }

@@ -72,10 +72,10 @@
                                 "$ref": "#/$defs/WorkableTaskModel"
                             },
                             {
-                                "type": "string"
+                                "const": "..."
                             },
                             {
-                                "const": "..."
+                                "type": "string"
                             }
                         ]
                     },
@@ -208,9 +208,6 @@
         },
         {
             "$ref": "#/$defs/WorkableTaskModel"
-        },
-        {
-            "type": "string"
         }
     ],
     "description": "File containing task information.",

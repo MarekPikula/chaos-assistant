@@ -1,4 +1,5 @@
 name: "Category"
+desc: Category description
 deadline: 2023-10-13
 labels:
   - Label 1

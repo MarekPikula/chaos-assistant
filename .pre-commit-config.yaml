@@ -36,6 +36,12 @@ repos:
       - id: generate_schema
         name: Generate configuration schema
         language: system
-        files: chaos_assistant/models/user.py
+        files: 'chaos_assistant/models/(file|user).py$'
         pass_filenames: false
-        entry: poetry run python -m chaos_assistant.models.user
+        entry: poetry run python -m chaos_assistant.models.file
+      - id: tests
+        name: Run tests
+        language: system
+        types: [python]
+        pass_filenames: false
+        entry: poetry run pytest tests/

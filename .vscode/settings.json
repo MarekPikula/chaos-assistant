@@ -33,6 +33,7 @@
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true,
     },
+    "python.formatting.provider": "none",
     "yaml.schemas": {
         "chaos_assistant/models/schemas/task.schema.json": [
             "examples/**/task-*.yaml",

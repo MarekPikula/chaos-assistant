@@ -1,0 +1,7 @@
+name: Main task in subcategory
+labels:
+  - Scoped label
+  - Label 2
+subtasks:
+  - Workable subtask 1.1
+  - Workable subtask 1.2
