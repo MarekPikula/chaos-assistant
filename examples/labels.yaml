@@ -1,0 +1,4 @@
+labels:
+  - Label 1
+  - name: Label 2
+    desc: This is a description of the second label.

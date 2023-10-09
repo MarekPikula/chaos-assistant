@@ -1,0 +1,23 @@
+name: Main task
+desc: |
+  Here is a multiline
+  description.
+deadline: 2023-10-31
+subtasks:
+  - String subtask
+  - name: Big task
+    desc: Big task with subtasks.
+    subtasks:
+      - Subtask
+      - name: We can go deeper
+        subtasks:
+          - Small task
+          - ...
+  - ...  # Special ellipsis task
+
+---
+
+Separate Markdown description
+
+- here we have a *list*,
+- of very **important** things to consider.

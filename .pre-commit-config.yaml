@@ -31,3 +31,11 @@ repos:
     rev: "v1.5.1"
     hooks:
       - id: mypy
+  - repo: local
+    hooks:
+      - id: generate_schema
+        name: Generate configuration schema
+        language: system
+        files: chaos_assistant/models/user.py
+        pass_filenames: false
+        entry: poetry run python -m chaos_assistant.models.user

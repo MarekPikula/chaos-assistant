@@ -1,0 +1,70 @@
+{
+    "$defs": {
+        "LabelModel": {
+            "description": "Item label.",
+            "properties": {
+                "id": {
+                    "description": "ID of the element. Can be any kind of string, but if not provided UUID4 will be used. Needs to be unique within the scope of the item.",
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the item.",
+                    "title": "Name",
+                    "type": "string"
+                },
+                "desc": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Description of the item. Can be provided as Markdown within the YAML file.",
+                    "title": "Desc"
+                },
+                "enabled": {
+                    "default": true,
+                    "description": "If the item is enabled.",
+                    "title": "Enabled",
+                    "type": "boolean"
+                },
+                "priority": {
+                    "default": 1,
+                    "description": "Priority of the item. Normalized at the item's level.",
+                    "minimum": 0,
+                    "title": "Priority",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "title": "LabelModel",
+            "type": "object"
+        }
+    },
+    "description": "File containing label description.",
+    "properties": {
+        "labels": {
+            "description": "List of labels in current scope.",
+            "items": {
+                "anyOf": [
+                    {
+                        "$ref": "#/$defs/LabelModel"
+                    },
+                    {
+                        "type": "string"
+                    }
+                ]
+            },
+            "title": "Labels",
+            "type": "array"
+        }
+    },
+    "title": "LabelsFileModel",
+    "type": "object"
+}

@@ -1,0 +1,218 @@
+{
+    "$defs": {
+        "GroupTaskModel": {
+            "description": "Task with subtasks.",
+            "properties": {
+                "id": {
+                    "description": "ID of the element. Can be any kind of string, but if not provided UUID4 will be used. Needs to be unique within the scope of the item.",
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the item.",
+                    "title": "Name",
+                    "type": "string"
+                },
+                "desc": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Description of the item. Can be provided as Markdown within the YAML file.",
+                    "title": "Desc"
+                },
+                "enabled": {
+                    "default": true,
+                    "description": "If the item is enabled.",
+                    "title": "Enabled",
+                    "type": "boolean"
+                },
+                "priority": {
+                    "default": 1,
+                    "description": "Priority of the item. Normalized at the item's level.",
+                    "minimum": 0,
+                    "title": "Priority",
+                    "type": "integer"
+                },
+                "deadline": {
+                    "anyOf": [
+                        {
+                            "format": "date",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Deadline of the work item.",
+                    "title": "Deadline"
+                },
+                "labels": {
+                    "description": "List of work item labels. Can be label names or IDs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "Labels",
+                    "type": "array"
+                },
+                "subtasks": {
+                    "description": "List of subtasks.",
+                    "items": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/$defs/GroupTaskModel"
+                            },
+                            {
+                                "$ref": "#/$defs/WorkableTaskModel"
+                            },
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "const": "..."
+                            }
+                        ]
+                    },
+                    "title": "Subtasks",
+                    "type": "array"
+                }
+            },
+            "required": [
+                "name",
+                "subtasks"
+            ],
+            "title": "GroupTaskModel",
+            "type": "object"
+        },
+        "WorkableTaskModel": {
+            "description": "Task on which a work can be done.",
+            "properties": {
+                "id": {
+                    "description": "ID of the element. Can be any kind of string, but if not provided UUID4 will be used. Needs to be unique within the scope of the item.",
+                    "title": "Id",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the item.",
+                    "title": "Name",
+                    "type": "string"
+                },
+                "desc": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Description of the item. Can be provided as Markdown within the YAML file.",
+                    "title": "Desc"
+                },
+                "enabled": {
+                    "default": true,
+                    "description": "If the item is enabled.",
+                    "title": "Enabled",
+                    "type": "boolean"
+                },
+                "priority": {
+                    "default": 1,
+                    "description": "Priority of the item. Normalized at the item's level.",
+                    "minimum": 0,
+                    "title": "Priority",
+                    "type": "integer"
+                },
+                "deadline": {
+                    "anyOf": [
+                        {
+                            "format": "date",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Deadline of the work item.",
+                    "title": "Deadline"
+                },
+                "labels": {
+                    "description": "List of work item labels. Can be label names or IDs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "Labels",
+                    "type": "array"
+                },
+                "complete": {
+                    "anyOf": [
+                        {
+                            "maximum": 100.0,
+                            "minimum": 0.0,
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "default": false,
+                    "description": "Level of task completeness.",
+                    "title": "Complete"
+                },
+                "next_slot": {
+                    "anyOf": [
+                        {
+                            "format": "date",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Next work slot.",
+                    "title": "Next Slot"
+                },
+                "last_slot": {
+                    "anyOf": [
+                        {
+                            "format": "date",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Last time the task was worked on.",
+                    "title": "Last Slot"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "title": "WorkableTaskModel",
+            "type": "object"
+        }
+    },
+    "anyOf": [
+        {
+            "$ref": "#/$defs/GroupTaskModel"
+        },
+        {
+            "$ref": "#/$defs/WorkableTaskModel"
+        },
+        {
+            "type": "string"
+        }
+    ],
+    "description": "File containing task information.",
+    "title": "TaskFileModel"
+}

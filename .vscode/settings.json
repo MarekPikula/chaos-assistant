@@ -10,7 +10,7 @@
         "-m",
         "pylint"
     ],
-    "mypy-type-checker.path":  [
+    "mypy-type-checker.path": [
         "${workspaceFolder}/.venv/bin/python",
         "-m",
         "mypy"
@@ -30,14 +30,21 @@
     ],
     "python.testing.unittestEnabled": false,
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
     },
-    // "yaml.schemas": {
-    //     "chaos_assistant/configuration.schema.json": [
-    //         "config.example.yaml",
-    //         "config.yaml",
-    //         "config.example.json",
-    //         "config.json"
-    //     ]
-    // }
+    "yaml.schemas": {
+        "chaos_assistant/models/schemas/task.schema.json": [
+            "examples/**/task-*.yaml",
+            "examples/**/task-*.yml"
+        ],
+        "chaos_assistant/models/schemas/labels.schema.json": [
+            "examples/**/labels.yaml",
+            "examples/**/labels.yml"
+        ],
+        "chaos_assistant/models/schemas/category.schema.json": [
+            "examples/**/category.yaml",
+            "examples/**/category.yml"
+        ],
+    }
 }
