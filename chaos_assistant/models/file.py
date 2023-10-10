@@ -9,7 +9,7 @@ from loguru import logger
 from pydantic import BaseModel, Field, RootModel
 from pydantic_yaml import parse_yaml_raw_as
 
-from .user import CategoryModel, LabelModel, Task
+from .user import CategoryModel, LabelModel, TaskModel
 
 SCHEMA_DIR = Path(__file__).parent / "schemas"
 """Directory containing file schemas."""
@@ -59,7 +59,7 @@ class CategoryFileModel(ChaosFileModel, RootModel[CategoryModel]):
         cls._export_schema("category")
 
 
-class TaskFileModel(ChaosFileModel, RootModel[Task]):
+class TaskFileModel(ChaosFileModel, RootModel[TaskModel]):
     """File containing task information."""
 
     @classmethod
@@ -68,13 +68,13 @@ class TaskFileModel(ChaosFileModel, RootModel[Task]):
         cls._export_schema("task")
 
 
-class ChaosDirectory(BaseModel):
+class ChaosDirectoryModel(BaseModel):
     """Chaos Assistant directory."""
 
     category: CategoryFileModel = Field(
         description="Category description (`category.yaml`)."
     )
-    subcategories: List["ChaosDirectory"] = Field(
+    subcategories: List["ChaosDirectoryModel"] = Field(
         default_factory=list,
         description="Subcategories (subdirectories).",
     )

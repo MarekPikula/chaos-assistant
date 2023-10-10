@@ -47,5 +47,9 @@
             "examples/**/category.yaml",
             "examples/**/category.yml"
         ],
-    }
+    },
+    "cSpell.words": [
+        "ruamel",
+        "ryaml"
+    ]
 }

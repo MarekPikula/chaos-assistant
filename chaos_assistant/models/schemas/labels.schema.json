@@ -5,11 +5,13 @@
             "properties": {
                 "id": {
                     "description": "ID of the element. Can be any kind of string, but if not provided UUID4 will be used. Needs to be unique within the scope of the item.",
+                    "pattern": "^[^/.\\s]+$",
                     "title": "Id",
                     "type": "string"
                 },
                 "name": {
                     "description": "Name of the item.",
+                    "pattern": "^[^/\\n]+$",
                     "title": "Name",
                     "type": "string"
                 },
