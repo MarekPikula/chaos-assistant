@@ -4,7 +4,6 @@
 from pathlib import Path
 
 import pytest
-from ruamel.yaml import YAML
 
 from chaos_assistant.models.file import ChaosDirectoryModel
 from chaos_assistant.models.internal import CategoryIntModel
@@ -31,12 +30,7 @@ def test_from_directory_model(
 ):
     """Test CategoryIntModel derivation from ChaosDirectoryModel."""
     result = CategoryIntModel.from_directory_model(example_directory_model)
-
-    with YAML(
-        typ="safe", pure=True, output=output_root / "internal_model.yaml"
-    ) as yaml:
-        yaml.default_flow_style = False
-        yaml.dump(result.model_dump(exclude_defaults=True))
+    result.export_yaml(output_root / "internal_model.yaml")
 
 
 # TODO: Add regression test. Needs to set static IDs for that.

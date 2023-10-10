@@ -1,7 +1,19 @@
 """Utilities and common classes used for data models."""
 
 from abc import ABC
-from typing import Any, Dict, Generic, Iterable, List, Optional, TypeVar, Union
+from dataclasses import dataclass
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterable,
+    List,
+    Optional,
+    Protocol,
+    TypeVar,
+    Union,
+)
 from uuid import uuid4
 
 import annotated_types
@@ -18,6 +30,12 @@ IdStr = Annotated[
 """String representing ID.
 
 Stripped from whitespaces, lowercase, cannot contain whitespaces and slashes.
+"""
+
+TidStr = Annotated[str, StringConstraints(pattern=r"^[LTWC]-[^/.\s]+$")]
+"""String representing typed ID.
+
+Typed ID is normal ID (IdStr) with type prefix.
 """
 
 NameStr = Annotated[str, StringConstraints(pattern=r"^[^/\n]+$")]
@@ -57,6 +75,21 @@ class ChaosBaseModel(ABC, BaseModel):
     )
 
 
+class TypedModel(BaseModel):
+    """Data model with typed ID."""
+
+    tid: TidStr
+    """Typed ID of the item."""
+
+    _tid_prefix: ClassVar[str] = "?"
+    """Typed ID prefix letter."""
+
+    @classmethod
+    def generate_tid(cls, source_id: IdStr) -> str:
+        """Generate typed ID from regular ID."""
+        return f"{cls._tid_prefix}-{source_id}"
+
+
 class ItemPath(RootModel[List[NameStr]]):
     """Item path as list of item names."""
 
@@ -82,7 +115,32 @@ class ItemPath(RootModel[List[NameStr]]):
         return "/" + "/".join(self.root)
 
 
-LookupT = TypeVar("LookupT", bound=ChaosBaseModel)
+@dataclass
+class ChaosKeyError(KeyError):
+    """Error during item add (key collision)."""
+
+    msg: str
+    subject: str
+    key: str
+
+
+@dataclass
+class ChaosLookupError(KeyError):
+    """Error during key lookup."""
+
+    msg: str
+    subject: str
+    key: str
+
+
+class LookupProtocol(Protocol):  # pylint: disable=R0903
+    """Item which can be looked up."""
+
+    name: NameStr
+    tid: TidStr
+
+
+LookupT = TypeVar("LookupT", bound=LookupProtocol)
 
 
 class ChaosLookup(Generic[LookupT]):
@@ -126,14 +184,16 @@ class ChaosLookup(Generic[LookupT]):
             overwrite -- overwrite dummy item if exists (default: {False})
 
         Raises:
-            KeyError: Key already exists in the current scope.
+            ChaosKeyError: Key already exists in the current scope.
         """
-        if item.id in self._table.keys() and (
-            not overwrite or self._table[item.id] is not None
+        if item.tid in self._table.keys() and (
+            not overwrite or self._table[item.tid] is not None
         ):
-            raise KeyError(
-                f'{self._subject.capitalize()} "{item.id}" '
-                "already exists in the current scope."
+            raise ChaosKeyError(
+                f'{self._subject.capitalize()} "{item.tid}" '
+                "already exists in the current scope.",
+                self._subject,
+                item.tid,
             )
 
         if (
@@ -141,12 +201,14 @@ class ChaosLookup(Generic[LookupT]):
             and item.name in self._table.keys()
             and (not overwrite or self._table[item.name] is not None)
         ):
-            raise KeyError(
+            raise ChaosKeyError(
                 f'{self._subject.capitalize()} name "{item.name}" '
-                "already exists in the current scope."
+                "already exists in the current scope.",
+                self._subject,
+                item.name,
             )
 
-        self._table[item.id] = item
+        self._table[item.tid] = item
         if self._index_by_name:
             self._table[item.name] = item
 
@@ -160,12 +222,14 @@ class ChaosLookup(Generic[LookupT]):
             key -- dummy key to register.
 
         Raises:
-            KeyError: Key already exists in the current scope.
+            ChaosKeyError: Key already exists in the current scope.
         """
         if key in self._table.keys():
-            raise KeyError(
+            raise ChaosKeyError(
                 f'{self._subject.capitalize()} "{key}" '
-                "already exists in the current scope."
+                "already exists in the current scope.",
+                self._subject,
+                key,
             )
 
         self._table[key] = None
@@ -186,15 +250,17 @@ class ChaosLookup(Generic[LookupT]):
             key -- lookup key.
 
         Raises:
-            KeyError: Item not found or only dummy item exists.
+            ChaosLookupError: Item not found or only dummy item exists.
 
         Returns:
             Item if it is found.
         """
         ret = self._table.get(key)
         if ret is None:
-            raise KeyError(
-                f'No {self._subject} with key "{key}" exists in the current scope.'
+            raise ChaosLookupError(
+                f'No {self._subject} with key "{key}" exists in the current scope.',
+                self._subject,
+                key,
             )
         return ret
 

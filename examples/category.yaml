@@ -1,5 +1,6 @@
 name: "Category"
 desc: Category description
 deadline: 2023-10-13
+id: test
 labels:
   - Label 1
