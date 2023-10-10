@@ -1,10 +1,6 @@
 """Chaos Assistant main."""
 
-
-def main():
-    """Chaos Assistant main."""
-    print("Hello world!")
-
+from .cli import main
 
 if __name__ == "__main__":
-    main()
+    main()  # pylint: disable=E1120
