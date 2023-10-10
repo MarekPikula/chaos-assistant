@@ -11,7 +11,7 @@
             "module": "chaos_assistant.__main__",
             "justMyCode": false,
             "cwd": "${workspaceFolder}",
-            // "args": []
+            "args": ["examples/", "export-internal", "-o", "output/internal_model.yaml"]
         },
         {
             "name": "Python: Generate schemas",

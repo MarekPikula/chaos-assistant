@@ -2,6 +2,7 @@
 
 from abc import ABC
 from dataclasses import dataclass
+from enum import Enum
 from typing import (
     Any,
     ClassVar,
@@ -75,19 +76,28 @@ class ChaosBaseModel(ABC, BaseModel):
     )
 
 
+class TidPrefixEnum(Enum):
+    """Typed ID prefixes."""
+
+    LABEL = "L"
+    GROUP_TASK = "T"
+    WORKABLE_TASK = "W"
+    CATEGORY = "C"
+
+
 class TypedModel(BaseModel):
     """Data model with typed ID."""
 
     tid: TidStr
     """Typed ID of the item."""
 
-    _tid_prefix: ClassVar[str] = "?"
+    _tid_prefix: ClassVar[TidPrefixEnum]
     """Typed ID prefix letter."""
 
     @classmethod
     def generate_tid(cls, source_id: IdStr) -> str:
         """Generate typed ID from regular ID."""
-        return f"{cls._tid_prefix}-{source_id}"
+        return f"{cls._tid_prefix.value}-{source_id}"
 
 
 class ItemPath(RootModel[List[NameStr]]):
@@ -267,6 +277,14 @@ class ChaosLookup(Generic[LookupT]):
     def get_iter(self, keys: Iterable[str]) -> Iterable[LookupT]:
         """Lookup multiple items."""
         return (self.get(key) for key in keys)
+
+    def get_type(self, key_type: TidPrefixEnum) -> Iterable[LookupT]:
+        """Get items of the given type."""
+        return (
+            item
+            for key, item in self._table.items()
+            if key.startswith(key_type.value) and item is not None
+        )
 
     def is_dummy(self, key: str) -> bool:
         """Check if given key is dummy."""
