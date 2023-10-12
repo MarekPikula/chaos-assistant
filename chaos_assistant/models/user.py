@@ -5,11 +5,13 @@ from typing import List, Literal, Optional, Union
 
 from pydantic import Field
 
-from .common import ChaosBaseModel, PercentageFloat
+from .common import ChaosBaseModel, PercentageFloat, TidPrefixEnum
 
 
 class LabelModel(ChaosBaseModel):  # pylint: disable=R0903
     """Item label."""
+
+    _tid_prefix = TidPrefixEnum.LABEL
 
     @classmethod
     def from_str(cls, s: str):
@@ -41,6 +43,8 @@ class GroupTaskModel(WorkItemModel):  # pylint: disable=R0903
         description="List of subtasks.",
     )
 
+    _tid_prefix = TidPrefixEnum.GROUP_TASK
+
 
 class WorkableTaskModel(WorkItemModel):  # pylint: disable=R0903
     """Task on which a work can be done."""
@@ -58,6 +62,8 @@ class WorkableTaskModel(WorkItemModel):  # pylint: disable=R0903
         description="Last time the task was worked on.",
     )
 
+    _tid_prefix = TidPrefixEnum.WORKABLE_TASK
+
     @classmethod
     def from_str(cls, s: str):
         """Create workable task from string."""
@@ -69,3 +75,5 @@ TaskModel = Union[GroupTaskModel, WorkableTaskModel]
 
 class CategoryModel(WorkItemModel):  # pylint: disable=R0903
     """Work category."""
+
+    _tid_prefix = TidPrefixEnum.CATEGORY

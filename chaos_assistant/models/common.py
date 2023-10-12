@@ -3,22 +3,13 @@
 from abc import ABC
 from dataclasses import dataclass
 from enum import Enum
-from typing import (
-    Any,
-    ClassVar,
-    Dict,
-    Generic,
-    Iterable,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-    Union,
-)
+from functools import cached_property
+from pathlib import Path
+from typing import ClassVar, Dict, Generic, Iterable, Optional, TypeVar, Union
 from uuid import uuid4
 
 import annotated_types
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, Field
 from pydantic.types import StringConstraints
 from typing_extensions import Annotated
 
@@ -44,6 +35,15 @@ NameStr = Annotated[str, StringConstraints(pattern=r"^[^/\n]+$")]
 
 Cannot contain slashes.
 """
+
+
+class TidPrefixEnum(Enum):
+    """Typed ID prefixes."""
+
+    LABEL = "L"
+    GROUP_TASK = "T"
+    WORKABLE_TASK = "W"
+    CATEGORY = "C"
 
 
 class ChaosBaseModel(ABC, BaseModel):
@@ -75,82 +75,39 @@ class ChaosBaseModel(ABC, BaseModel):
         description="Priority of the item. Normalized at the item's level.",
     )
 
-
-class TidPrefixEnum(Enum):
-    """Typed ID prefixes."""
-
-    LABEL = "L"
-    GROUP_TASK = "T"
-    WORKABLE_TASK = "W"
-    CATEGORY = "C"
-
-
-class TypedModel(BaseModel):
-    """Data model with typed ID."""
-
-    tid: TidStr
-    """Typed ID of the item."""
-
     _tid_prefix: ClassVar[TidPrefixEnum]
     """Typed ID prefix letter."""
 
     @classmethod
-    def generate_tid(cls, source_id: IdStr) -> str:
+    def generate_tid(cls, source_id: IdStr) -> TidStr:
         """Generate typed ID from regular ID."""
         return f"{cls._tid_prefix.value}-{source_id}"
 
-
-class ItemPath(RootModel[List[NameStr]]):
-    """Item path as list of item names."""
-
-    root: List[NameStr] = Field(default_factory=list)
-
-    def __truediv__(self, b: Any):
-        """Division handler.
-
-        Similar to pathlib.Path.
-        """
-        if isinstance(b, str):
-            return ItemPath(root=self.root + [b])
-        if isinstance(b, list):
-            return ItemPath(root=self.root + b)
-        if isinstance(b, ItemPath):
-            return ItemPath(root=self.root + b.root)
-        raise NotImplementedError(
-            f"Cannot use / on ItemPath with {b.__class__.__name__}"
-        )
-
-    def __str__(self) -> str:
-        """Get the string representation of the path."""
-        return "/" + "/".join(self.root)
+    @cached_property
+    def tid(self) -> TidStr:
+        """Get typed ID of the item."""
+        return self.generate_tid(self.id)
 
 
 @dataclass
-class ChaosKeyError(KeyError):
+class BaseChaosLookupError(Exception):
+    """Base lookup error."""
+
+    msg: str
+    subject: str
+    scope: Path
+    key: str
+
+
+class ChaosKeyError(BaseChaosLookupError, KeyError):
     """Error during item add (key collision)."""
 
-    msg: str
-    subject: str
-    key: str
 
-
-@dataclass
-class ChaosLookupError(KeyError):
+class ChaosLookupError(BaseChaosLookupError, KeyError):
     """Error during key lookup."""
 
-    msg: str
-    subject: str
-    key: str
 
-
-class LookupProtocol(Protocol):  # pylint: disable=R0903
-    """Item which can be looked up."""
-
-    name: NameStr
-    tid: TidStr
-
-
-LookupT = TypeVar("LookupT", bound=LookupProtocol)
+LookupT = TypeVar("LookupT", bound=ChaosBaseModel)
 
 
 class ChaosLookup(Generic[LookupT]):
@@ -163,6 +120,7 @@ class ChaosLookup(Generic[LookupT]):
             Union[Dict[str, Optional[LookupT]], "ChaosLookup[LookupT]"]
         ] = None,
         index_by_name: bool = False,
+        scope: Path = Path("/"),
     ):
         """Construct item lookup.
 
@@ -173,9 +131,11 @@ class ChaosLookup(Generic[LookupT]):
             base -- existing lookup (copied) on which we want to base (default: {None})
             index_by_name -- by default lookup is indexed only on UUID. With this option
                 enabled, name is also used as index (default: {False})
+            scope -- scope of this lookup (default: root scope)
         """
         self._subject = subject.lower()
         self._index_by_name = index_by_name
+        self._scope = scope
 
         if base is None:
             self._table = {}
@@ -201,8 +161,9 @@ class ChaosLookup(Generic[LookupT]):
         ):
             raise ChaosKeyError(
                 f'{self._subject.capitalize()} "{item.tid}" '
-                "already exists in the current scope.",
+                f'already exists in the "{self._scope}" lookup scope.',
                 self._subject,
+                self._scope,
                 item.tid,
             )
 
@@ -213,8 +174,9 @@ class ChaosLookup(Generic[LookupT]):
         ):
             raise ChaosKeyError(
                 f'{self._subject.capitalize()} name "{item.name}" '
-                "already exists in the current scope.",
+                f'already exists in the "{self._scope}" lookup scope.',
                 self._subject,
+                self._scope,
                 item.name,
             )
 
@@ -237,8 +199,9 @@ class ChaosLookup(Generic[LookupT]):
         if key in self._table.keys():
             raise ChaosKeyError(
                 f'{self._subject.capitalize()} "{key}" '
-                "already exists in the current scope.",
+                f'already exists in the "{self._scope}" lookup scope.',
                 self._subject,
+                self._scope,
                 key,
             )
 
@@ -270,6 +233,7 @@ class ChaosLookup(Generic[LookupT]):
             raise ChaosLookupError(
                 f'No {self._subject} with key "{key}" exists in the current scope.',
                 self._subject,
+                self._scope,
                 key,
             )
         return ret

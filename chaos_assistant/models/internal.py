@@ -1,50 +1,29 @@
 """Internal data representation."""
 
 from datetime import date
+from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, Union
 
 from pydantic import Field, RootModel
 from ruamel.yaml import YAML
 
-from .common import (
-    ChaosBaseModel,
-    ChaosLookup,
-    ItemPath,
-    PercentageFloat,
-    TidPrefixEnum,
-    TypedModel,
-)
+from .common import ChaosBaseModel, ChaosLookup, PercentageFloat, TidPrefixEnum
 from .file import ChaosDirectoryModel
 from .user import GroupTaskModel, LabelModel, Task, WorkableTaskModel
 
-
-class LabelIntModel(LabelModel, TypedModel):
-    """Label model (internal)."""
-
-    _tid_prefix = TidPrefixEnum.LABEL
-
-    @classmethod
-    def from_user_model(cls, label: LabelModel):
-        """Create internal model from user model (from file)."""
-        return cls(tid=cls.generate_tid(label.id), **label.model_dump())
-
-
-LabelLookupScope = ChaosLookup[LabelIntModel]
+LabelLookupScope = ChaosLookup[LabelModel]
 """Lookup of labels within the current scope."""
 
 IdLookup = ChaosLookup["LookupModels"]
 """Global lookup of UUIDs."""
 
 
-class WorkItemIntModel(ChaosBaseModel, TypedModel):
+class WorkItemIntModel(ChaosBaseModel):
     """Workable item (internal)."""
 
     # Needed for label_lookup and id_lookup.
     model_config = {"arbitrary_types_allowed": True}
-
-    path: ItemPath = Field(..., description="Path of the item.")
-    # TODO: Make the path a cacheable property.
 
     deadline: Optional[date] = None
     labels: List[LabelModel] = Field(default_factory=list)
@@ -59,6 +38,16 @@ class WorkItemIntModel(ChaosBaseModel, TypedModel):
     uuid_lookup: IdLookup = Field(
         description="Global UUID lookup reference", exclude=True
     )
+
+    @cached_property
+    def path(self) -> Path:
+        """Get the item path."""
+        cur_path = Path(self.name)
+        parent = self.parent
+        while parent is not None:
+            cur_path = parent.name / cur_path
+            parent = parent.parent
+        return "/" / cur_path
 
     @staticmethod
     def task_from_file_model(parent: "WorkItemIntModel", task: Task) -> "TaskInt":
@@ -91,11 +80,9 @@ class GroupTaskIntModel(WorkItemIntModel):
 
         parent.uuid_lookup.add_dummy(file_model.id)
         ret = cls(
-            tid=cls.generate_tid(file_model.id),
             parent=parent,
             label_scope=parent.label_scope,
             uuid_lookup=parent.uuid_lookup,
-            path=parent.path / file_model.name,
             **file_model_dict,
         )
         ret.subtasks = list(
@@ -121,11 +108,9 @@ class WorkableTaskIntModel(WorkItemIntModel):
         file_model_dict["labels"] = list(parent.label_scope.get_iter(file_model.labels))
 
         ret = cls(
-            tid=cls.generate_tid(file_model.id),
             parent=parent,
             label_scope=parent.label_scope,
             uuid_lookup=parent.uuid_lookup,
-            path=parent.path / file_model.name,
             **file_model_dict,
         )
         parent.uuid_lookup.add(ret)
@@ -133,7 +118,7 @@ class WorkableTaskIntModel(WorkItemIntModel):
 
 
 LookupModels = Union[
-    LabelIntModel, GroupTaskIntModel, WorkableTaskIntModel, "CategoryIntModel"
+    LabelModel, GroupTaskIntModel, WorkableTaskIntModel, "CategoryIntModel"
 ]
 """Models which can be looked up (with UUID)."""
 
@@ -170,15 +155,14 @@ class CategoryIntModel(WorkItemIntModel):
             "label",
             None if parent is None else parent.label_scope,
             index_by_name=True,
+            scope=(parent.path if parent is not None else Path("/")) / category.name,
         )
 
         uuid_lookup = IdLookup("id") if parent is None else parent.uuid_lookup
 
         local_labels = (
             list(
-                LabelIntModel.from_user_model(LabelModel.from_str(label))
-                if isinstance(label, str)
-                else LabelIntModel.from_user_model(label)
+                LabelModel.from_str(label) if isinstance(label, str) else label
                 for label in dir_model.labels.labels
             )
             if dir_model.labels is not None
@@ -192,9 +176,7 @@ class CategoryIntModel(WorkItemIntModel):
 
         uuid_lookup.add_dummy(category.id)
         ret = cls(
-            tid=cls.generate_tid(category.id),
             parent=parent,
-            path=(ItemPath() if parent is None else parent.path) / category.name,
             subcategories=[],
             tasks=[],
             label_scope=label_scope,

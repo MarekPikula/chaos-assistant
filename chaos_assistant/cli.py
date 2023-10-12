@@ -42,10 +42,20 @@ def main(ctx: click.Context, chaos: Path):
             )
         sys.exit(-1)
     except ChaosLookupError as lookup_err:
-        logger.error("Failed to find {}: {}", lookup_err.subject, lookup_err.key)
+        logger.error(
+            'Failed to find {} "{}" in scope {}.',
+            lookup_err.subject,
+            lookup_err.key,
+            lookup_err.scope,
+        )
         sys.exit(-1)
     except ChaosKeyError as lookup_err:
-        logger.error("Duplicate {}: {}", lookup_err.subject, lookup_err.key)
+        logger.error(
+            'Duplicate {} "{}" in scope {}.',
+            lookup_err.subject,
+            lookup_err.key,
+            lookup_err.scope,
+        )
         sys.exit(-1)
 
     ctx.ensure_object(dict)
