@@ -1,4 +1,5 @@
 """Data model tests."""
+
 # pylint: disable=W0621
 
 from pathlib import Path
