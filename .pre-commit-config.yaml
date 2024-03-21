@@ -43,3 +43,9 @@ repos:
         types: [python]
         pass_filenames: false
         entry: poetry run pytest tests/
+
+ci:
+  skip:
+    - poetry-lock  # Due to errors during PyPI connection.
+    - generate_schema
+    - tests
